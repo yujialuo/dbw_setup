@@ -1,0 +1,28 @@
+
+RUN sudo pip install -r requirements.txt
+
+RUN mkdir -p /dbw_ws/src
+
+WORKDIR /dbw_ws/src
+
+RUN wstool init src
+
+RUN wstool merge -t src https://bitbucket.org/DataspeedInc/dbw_mkz_ros/raw/default/dbw_mkz.rosinstall
+
+RUN wstool update -t src
+
+RUN rosdep update
+
+RUN rosdep install --from-paths src --ignore-src
+
+RUN sudo cp dataspeed_can/dataspeed_can_usb/udev/90-DataspeedUsbCanToolRules.rules /etc/udev/rules.d/
+
+RUN sudo udevadm control --reload-rules
+
+RUN sudo service udev restart
+
+RUN sudo udevadm trigger
+
+RUN catkin_make -DCMAKE_BUILD_TYPE=Release
+
+RUN source /dbw_ws/devel/setup.bash
