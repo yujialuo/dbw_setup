@@ -1,3 +1,1 @@
-#!/usr/bin/env bash
-
-docker build -t bdd/dbw_mkz_ros -f RosDockerfile .
+docker run --privileged -it bdd/dbw_mkz_ros

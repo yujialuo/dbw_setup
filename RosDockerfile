@@ -1,28 +1,45 @@
+FROM ubuntu:16.04
 
-RUN sudo pip install -r requirements.txt
+RUN apt-get update && apt-get install -y \
+  sudo \
+  gcc \
+  git \
+  mercurial \
+  build-essential
+
+RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros-latest.list'
+
+RUN sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+
+RUN sudo apt-get update
+RUN sudo apt-get install ros-kinetic-desktop-full -y
+
+RUN touch /root/.bashrc
+RUN echo "source /opt/ros/kinetic/setup.bash" >> /root/.bashrc
+RUN /bin/bash -c "source /root/.bashrc"
+RUN sudo apt-get install -y \
+  python-rosinstall \
+  python-rosinstall-generator 
+
+RUN sudo apt-get install python-setuptools python-dev
+RUN sudo easy_install pip
+ADD requirements.txt /
+RUN pip install -r requirements.txt
 
 RUN mkdir -p /dbw_ws/src
 
-WORKDIR /dbw_ws/src
+WORKDIR /dbw_ws
 
 RUN wstool init src
-
 RUN wstool merge -t src https://bitbucket.org/DataspeedInc/dbw_mkz_ros/raw/default/dbw_mkz.rosinstall
-
 RUN wstool update -t src
 
+RUN sudo rosdep init
 RUN rosdep update
 
-RUN rosdep install --from-paths src --ignore-src
+RUN rosdep install --from-paths src --ignore-src --rosdistro kinetic -y -r
 
-RUN sudo cp dataspeed_can/dataspeed_can_usb/udev/90-DataspeedUsbCanToolRules.rules /etc/udev/rules.d/
+COPY ./etc/udev/rules.d /etc/udev/rules.d
+RUN sudo cp src/dataspeed_can/dataspeed_can_usb/udev/90-DataspeedUsbCanToolRules.rules /etc/udev/rules.d/
 
-RUN sudo udevadm control --reload-rules
-
-RUN sudo service udev restart
-
-RUN sudo udevadm trigger
-
-RUN catkin_make -DCMAKE_BUILD_TYPE=Release
-
-RUN source /dbw_ws/devel/setup.bash
+RUN sudo apt-get install -y udev
