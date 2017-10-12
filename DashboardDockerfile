@@ -1,2 +1,13 @@
 
-RUN pip install -r requirements.txt
+FROM bdd/dbw_mkz_ros:latest
+
+RUN apt-cache search pyqt
+RUN sudo apt-get install python-qt4
+
+WORKDIR /dbw_ws/src
+RUN git clone git@github.com:Jmq14/ROS_car_dashboard.git
+RUN mv ROS_car_dashboard monitor
+
+WORKDIR /dbw_ws/
+RUN catkin_make
+RUN /bin/bash -c "source devel/setup.bash"

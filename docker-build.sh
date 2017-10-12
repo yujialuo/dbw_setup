@@ -8,4 +8,7 @@
 # Intall Ros
 mkdir -p ./etc/udev/rules.d/
 cp /etc/udev/rules.d/* ./etc/udev/rules.d/
+
 sudo docker build -t bdd/dbw_mkz_ros -f RosDockerfile .
+
+sudo docker build -t bdd/dashboard -f DashboardDockerfile .

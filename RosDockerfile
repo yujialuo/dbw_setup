@@ -43,3 +43,13 @@ COPY ./etc/udev/rules.d /etc/udev/rules.d
 RUN sudo cp src/dataspeed_can/dataspeed_can_usb/udev/90-DataspeedUsbCanToolRules.rules /etc/udev/rules.d/
 
 RUN sudo apt-get install -y udev
+
+RUN sudo udevadm control --reload-rules
+
+RUN sudo service udev restart
+
+RUN sudo udevadm trigger
+
+RUN catkin_make -DCMAKE_BUILD_TYPE=Release
+
+RUN /bin/bash -c "source /dbw_ws/devel/setup.bash"
